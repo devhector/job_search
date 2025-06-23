@@ -1,10 +1,13 @@
-from telegram import Bot
+import requests
 
 
 class Telegram_bot:
     def __init__(self, token_id, chat_id) -> None:
-        self.bot = Bot(token=token_id)
+        self.token_id = token_id
         self.chat_id = chat_id
+        self.BASE_URL = f"https://api.telegram.org/bot{token_id}"
 
     def send(self, message) -> None:
-        self.bot.send_message(text=message, chat_id=self.chat_id)
+        payload = {"chat_id": self.chat_id, "text": message, "parse_mode": "Markdown"}
+        response = requests.post(f"{self.BASE_URL}/sendMessage", data=payload)
+        response.raise_for_status()
