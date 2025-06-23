@@ -6,13 +6,13 @@ class Proxy:
     def __init__(self, proxy_api_url) -> None:
         self.proxy_api_url = proxy_api_url
 
-    def random_proxy(self):
+    def random_proxy(self) -> str:
         csv = self.get_proxies()
         df = pd.read_csv(csv)
 
-        random_line = self.get_random_line(df)
+        random_line = self._get_random_line(df)
 
-        return random_line["proxy"]
+        return random_line["proxy"].iloc[0]
 
     def get_proxies(self):
         response = requests.get(self.proxy_api_url)
@@ -24,7 +24,7 @@ class Proxy:
                 f"Cannot get the proxies, status code: {response.status_code}"
             )
 
-    def get_random_line(self, dataframe):
+    def _get_random_line(self, dataframe):
         max_attempts = 100
         attempts = 0
 
