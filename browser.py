@@ -1,9 +1,6 @@
-from playwright.sync_api import sync_playwright
-
-
 class Browser:
-    def __init__(self, headless=False):
-        self.playwright = sync_playwright.start()
+    def __init__(self, playwright, headless=False):
+        self.playwright = playwright
         self.browser = self.new_browser(headless=headless)
         self.context = self.browser.new_context()
         self.page = self.context.new_page()
