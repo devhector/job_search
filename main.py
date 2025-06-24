@@ -1,6 +1,7 @@
 import os
 from bot import Telegram_bot
 from browser import Browser
+from db import Job_database
 from dotenv import load_dotenv
 from linkedin import Linkedin
 from playwright.sync_api import sync_playwright
@@ -13,6 +14,7 @@ def main():
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
 
     with sync_playwright() as p:
+        db = Job_database()
         browser = Browser(playwright=p, headless=True)
         linkedin = Linkedin(browser)
         bot = Telegram_bot(telegram_api_key, chat_id)
@@ -28,8 +30,13 @@ def main():
                 posted_time=24,
             )
 
-            for job in jobs:
+            new_jobs = db.filter_new_jobs(jobs)
+            for job in new_jobs:
+                print(f"send job: {job['title']}")
                 bot.send(prettify(job))
+
+            db.save(new_jobs)
+            db.close()
         except Exception as e:
             print(e)
         finally:
