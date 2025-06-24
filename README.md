@@ -31,6 +31,8 @@ python3 -m venv venv
 source venv/bin/activate
 
 pip install -r requirements.txt
+
+playwright install
 ```
 
 #### Passo 3:
@@ -47,5 +49,7 @@ Se tudo der certo, as vagas aparecerão no chatbot.
 
 Essa primeira implementação está muito manual ainda (foi somente uma prova de conceito), mas melhorias estão sendo feitas.
 Na estratégia atual, foi pensado o uso do crontab para a execução periódica dessa solução, mas está longe de ser a ideal.
-- Será implementado um banco de dados, para que as vagas que já foram notificadas não se repitam.
-- A busca e notificação de vagas será implementada de forma assíncrona
+- [x] Será implementado um banco de dados, para que as vagas que já foram notificadas não se repitam.
+- [ ] A busca e notificação de vagas será implementada de forma assíncrona
+- [ ] Rodar o script uma vez e ele ficar em um loop controlado, com o tempo que fará as buscas
+
