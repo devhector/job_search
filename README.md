@@ -10,8 +10,8 @@ que notifica através de um bot do telegram novas vagas específicadas pelo filt
 #### Instruções de uso:
 
 ##### Passo 1:
-Como vamos usar o telegram para nos notificar, então precisamos primeiramente criar um bot,
-para fazer isso é só pesquisar Botfather na busca do telegram e as demais instruções serão dadas
+Como vamos usar o telegram para nos notificar, então precisamos primeiramente criar um bot.
+Para fazer isso é só pesquisar Botfather na busca do telegram e as demais instruções serão dadas
 por ele.
 
 Depois de concluir esta etapa, você terá o token necessário para o envio de mensagens ao telegram.
@@ -20,7 +20,7 @@ do chat, para isso mande uma mensagem para o bot, e em seguida use o seguinte co
 ```sh
 curl https://api.telegram.org/bot<TOKEN>/getUpdates
 ```
-(substitua o <TOKEN> pelo token usado no `.env`) com isso será exibido os chats abertos, pegue o id
+(substitua o \<TOKEN\> pelo token usado no `.env`) com isso será exibido os chats abertos, pegue o id
 do chat com você. Adicione esse `id` ao `.env`.
 
 ##### Passo 2:
