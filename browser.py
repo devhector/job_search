@@ -1,7 +1,9 @@
 class Browser:
-    def __init__(self, playwright, headless=False):
+    def __init__(self, playwright, headless=False, proxy_settings=None):
         self.playwright = playwright
-        self.browser = self.new_browser(headless=headless)
+        self.browser = self.new_browser(
+            headless=headless, proxy_settings=proxy_settings
+        )
         self.context = self.browser.new_context()
         self.page = self.context.new_page()
 
@@ -16,5 +18,5 @@ class Browser:
         self.browser.close()
         self.playwright.stop()
 
-    def new_browser(self, headless=False):
-        return self.playwright.chromium.launch(headless=headless)
+    def new_browser(self, headless=False, proxy_settings=None):
+        return self.playwright.chromium.launch(headless=headless, proxy=proxy_settings)
