@@ -1,5 +1,7 @@
 import os
 import json
+import time
+import random
 
 
 class Linkedin:
@@ -13,6 +15,7 @@ class Linkedin:
             self._manual_login()
 
         self._load_cookie()
+        time.sleep(random.uniform(1.0, 3.0))
 
     def _manual_login(self) -> None:
         new_browser = self.browser.new_browser()
@@ -59,6 +62,7 @@ class Linkedin:
         )
 
         page = self.browser.goto(search_url)
+        time.sleep(random.uniform(1.0, 5.0))
 
         try:
             page.wait_for_selector("div.job-card-container", timeout=15000)
