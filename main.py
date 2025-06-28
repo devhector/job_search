@@ -1,87 +1,115 @@
 import os
-import time
 import random
-from bot import Telegram_bot
+import time
+
+from dotenv import load_dotenv
+from playwright.sync_api import sync_playwright
+
+from authenticator import Authenticator
 from browser import Browser
 from db import Job_database
-from dotenv import load_dotenv
 from linkedin import Linkedin
-from playwright.sync_api import sync_playwright
+from messenger import Messenger
+from searcher import Searcher
+from telegram_bot import Telegram_bot
 
 
 def main():
     load_dotenv()
 
-    while True:
-        try:
-            print("\nBuscando busca de vagas...")
-            search()
-
-            wait_time = random.randint(300, 3600)
-            next_run = time.strftime(
-                "%H:%M:%S", time.localtime(time.time() + wait_time)
-            )
-            print(f"\nPróxima execução em {wait_time // 60} minutos ({next_run})...")
-            time.sleep(wait_time)
-
-        except KeyboardInterrupt:
-            print("\ninterrompido pelo usuário")
-            break
-        except Exception as e:
-            print(f"\nErro durante a execução: {e}")
-            print("Reiniciando busca após 5 minutos...")
-            time.sleep(300)
-
-
-def search():
-    telegram_api_key = os.getenv("TELEGRAM_API_KEY")
-    chat_id = os.getenv("TELEGRAM_CHAT_ID")
-
-    browser = None
     db = None
+    browser = None
 
     with sync_playwright() as p:
         try:
-            browser = Browser(
-                playwright=p,
-                headless=True,
-                slow_mo=random.randint(500, 2000),
-            )
+            messenger, searcher, db, browser = config(p)
 
-            db = Job_database()
-            linkedin = Linkedin(browser)
-            bot = Telegram_bot(telegram_api_key, chat_id)
+            while True:
+                try:
+                    job_title = random_job_title()
+                    location = random_location()
+                    seniority_map = {"junior": "1",
+                                     "pleno": "2", "senior": "3"}
+                    seniority = random_seniority(seniority_map)
+                    posted_time = random.randint(24, 36)
 
-            seniority = {"junior": "1", "pleno": "2", "senior": "3"}
+                    terms = {
+                        "title": job_title,
+                        "location": location,
+                        "seniority": seniority,
+                        "posted_time": posted_time,
+                    }
 
-            linkedin.login()
+                    message = (
+                        "Buscando vagas com os termos:\n"
+                        f"- *Título:* `{terms['title']}`\n"
+                        f"- *Local:* `{terms['location']}`\n"
+                        f"- *Senioridade:* `{', '.join(terms['seniority'])}`\n"
+                        f"- *Postado nas últimas:* `{terms['posted_time']}h`"
+                    )
 
-            job_title = random_job_title()
-            posted_time = random.randint(24, 36)
-            seniority_codes = random_seniority(seniority)
-            location = random_location()
+                    print(f"\n{message}")
+                    messenger.send("info", {"title": message})
 
-            jobs = linkedin.search_jobs(
-                title=job_title,
-                location=location,
-                seniority=seniority_codes,
-                posted_time=posted_time,
-            )
+                    all_jobs = searcher.search(terms)
+                    all_jobs = [job for group in all_jobs for job in group]
 
-            new_jobs = db.filter_new_jobs(jobs)
-            for job in new_jobs:
-                print(f"Enviando vaga: {job['title']}")
-                bot.send(prettify(job))
+                    new_jobs = db.filter_new_jobs(all_jobs)
+                    for job in new_jobs:
+                        print(f"Enviando vaga: {job['title']}")
+                        messenger.send("job", job)
 
-            db.save(new_jobs)
+                    db.save(new_jobs)
 
-        except Exception as e:
-            print(f"Erro durante a busca: {e}")
+                    wait_time = random.randint(300, 3600)
+                    next_run = time.strftime(
+                        "%H:%M:%S", time.localtime(time.time() + wait_time)
+                    )
+                    msg = (
+                        f"⏱️ Próxima execução em {wait_time // 60} minutos ({next_run})"
+                    )
+                    print(f"\n{msg}")
+                    messenger.send("info", {"title": msg})
+                    time.sleep(wait_time)
+
+                except KeyboardInterrupt:
+                    print("\nInterrompido pelo usuário")
+                    break
+                except Exception as e:
+                    error_msg = f"Erro durante a execução: {e}"
+                    print(f"\nError: {error_msg}")
+                    messenger.send("error", {"title": error_msg})
+                    print("⏳ Reiniciando após 5 minutos...")
+                    time.sleep(300)
+
         finally:
-            if db:
-                db.close()
             if browser:
                 browser.close()
+            if db:
+                db.close()
+
+
+def config(playwright) -> tuple[Messenger, Searcher, Job_database, Browser]:
+    telegram_config = {
+        "token_id": os.getenv("TELEGRAM_API_KEY"),
+        "chat_id": os.getenv("TELEGRAM_CHAT_ID"),
+    }
+
+    db = Job_database()
+    browser = Browser(
+        playwright=playwright,
+        headless=True,
+        slow_mo=random.randint(500, 2000),
+    )
+
+    linkedin = Linkedin(browser)
+    authenticator = Authenticator([linkedin])
+    authenticator.auth()
+
+    messenger = Messenger([Telegram_bot(telegram_config)])
+    searcher = Searcher([linkedin])
+
+    return messenger, searcher, db, browser
 
 
 def random_job_title():
@@ -90,24 +118,15 @@ def random_job_title():
 
 
 def random_location():
-    terms = ["Brasil", "Brazil", "Rio de Janeiro", "Remoto", "Rio de Janeiro (Remoto)"]
+    terms = ["Brasil", "Brazil", "Rio de Janeiro",
+             "Remoto", "Rio de Janeiro (Remoto)"]
     return random.choice(terms)
 
 
 def random_seniority(seniority_map):
     levels = ["junior", "pleno", "senior"]
     selected = random.sample(levels, random.randint(1, 2))
-    return [seniority_map[level] for level in selected]
-
-
-def prettify(job):
-    return (
-        f"📌 *{job['title']}*\n"
-        f"🏢 {job['company']}\n"
-        f"📍 {job['location']}\n"
-        f"🔗 [Ver vaga]({job['link']})\n"
-        "-----------------------------"
-    )
+    return [seniority_map["junior"]]
 
 
 if __name__ == "__main__":

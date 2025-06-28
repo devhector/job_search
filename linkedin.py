@@ -3,11 +3,16 @@ import json
 import time
 import random
 
+from platform import Platform
 
-class Linkedin:
+
+class Linkedin(Platform):
     def __init__(self, browser):
         self.BASE_URL = "https://www.linkedin.com"
         self.COOKIE_PATH = "cookies/linkedin.json"
+        self.TOP_BAR_FEED = (
+            "div.share-box-feed-entry-toolbar__wrapper.share-box-feed-entry__tool-bar"
+        )
         self.browser = browser
 
     def login(self):
@@ -15,25 +20,31 @@ class Linkedin:
             self._manual_login()
 
         self._load_cookie()
+        self._check_login()
+
         time.sleep(random.uniform(1.0, 3.0))
 
-    def _manual_login(self) -> None:
-        new_browser = self.browser.new_browser()
+    def _check_login(self) -> None:
+        page = self.browser.page
+        page.goto(self.BASE_URL)
+        page.wait_for_selector(
+            self.TOP_BAR_FEED,
+            timeout=100000,
+        )
 
+    def _manual_login(self) -> None:
         try:
-            new_context = new_browser.new_context()
-            page = new_context.new_page()
+            page = self.browser.page
             page.goto(f"{self.BASE_URL}/login")
             print("Please login so that the cookie can be saved!")
             page.wait_for_selector(
-                "div.share-box-feed-entry-toolbar__wrapper.share-box-feed-entry__tool-bar",
+                self.TOP_BAR_FEED,
                 timeout=300000,
             )
             self._save_cookie(page)
         except Exception as e:
             print(e)
-        finally:
-            new_browser.close()
+            raise e
 
     def _save_cookie(self, page) -> None:
         os.makedirs(os.path.dirname(self.COOKIE_PATH), exist_ok=True)
