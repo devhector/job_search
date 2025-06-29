@@ -63,7 +63,19 @@ class Linkedin(Platform):
 
     def search_jobs(self, title, location, seniority, posted_time=24):
         seconds = posted_time * 60 * 60
-        seniority_param = ",".join(seniority)
+
+        seniority_map = {"junior": "1", "pleno": "2", "senior": "3"}
+        seniority_ids = [
+            seniority_map[level.lower()]
+            for level in seniority
+            if level.lower() in seniority_map
+        ]
+
+        if not seniority_ids:
+            raise Exception(f"Nenhuma senioridade válida encontrada em: {seniority}")
+
+        seniority_param = ",".join(seniority_ids)
+
         search_url = (
             f"{self.BASE_URL}/jobs/search/"
             f"?keywords={title}"
