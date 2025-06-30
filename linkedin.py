@@ -4,6 +4,7 @@ import time
 import random
 
 from platform import Platform
+from logger import logger
 
 
 class Linkedin(Platform):
@@ -36,14 +37,14 @@ class Linkedin(Platform):
         try:
             page = self.browser.page
             page.goto(f"{self.BASE_URL}/login")
-            print("Please login so that the cookie can be saved!")
+            logger.info("Please login so that the cookie can be saved!")
             page.wait_for_selector(
                 self.TOP_BAR_FEED,
                 timeout=300000,
             )
             self._save_cookie(page)
         except Exception as e:
-            print(e)
+            logger.error(e)
             raise e
 
     def _save_cookie(self, page) -> None:
@@ -90,7 +91,7 @@ class Linkedin(Platform):
         try:
             page.wait_for_selector("div.job-card-container", timeout=15000)
         except Exception as e:
-            print("List of jobs cannot be opened.")
+            logger.error("List of jobs cannot be opened.")
             raise e
 
         return self._jobs_parser(page.query_selector_all("div.job-card-container"))
@@ -123,6 +124,6 @@ class Linkedin(Platform):
                 )
 
             except Exception as e:
-                print(f"An error occurred: {e}")
+                logger.error(f"An error occurred: {e}")
                 continue
         return jobs_data

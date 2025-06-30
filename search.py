@@ -12,6 +12,7 @@ from authenticator import Authenticator
 from browser import Browser
 from db import Job_database
 from linkedin import Linkedin
+from logger import logger
 from messenger import Messenger
 from searcher import Searcher
 from telegram_bot import Telegram_bot
@@ -23,7 +24,16 @@ def main():
     db = None
     browser = None
 
-    job_titles = ["Java", "Java Developer", "Desenvolvedor Java", "Java Backend"]
+    job_titles = [
+        "Java",
+        "Java Developer",
+        "Desenvolvedor Java",
+        "Java Backend",
+        "Python",
+        "Python Backend",
+        "PHP",
+        "PHP Backend",
+    ]
     locations = [
         "Brasil",
         "Brazil",
@@ -31,7 +41,7 @@ def main():
         "Remoto",
         "Rio de Janeiro (Remoto)",
     ]
-    seniority_levels = ["junior", "pleno", "senior"]
+    seniority_levels = ["junior"]
 
     combinations = list(itertools.product(job_titles, locations, seniority_levels))
     sp_tz = zoneinfo.ZoneInfo("America/Sao_Paulo")
@@ -62,7 +72,7 @@ def main():
                             f"- *Postado nas últimas:* `{terms['posted_time']}h`"
                         )
 
-                        print(f"\n{message}")
+                        logger.info(f"\n{message}")
                         messenger.send("info", {"title": message})
 
                         all_jobs = searcher.search(terms)
@@ -70,7 +80,7 @@ def main():
 
                         new_jobs = db.filter_new_jobs(all_jobs)
                         for job in new_jobs:
-                            print(f"Enviando vaga: {job['title']}")
+                            logger.info(f"Enviando vaga: {job['title']}")
                             messenger.send("job", job)
 
                         db.save(new_jobs)
@@ -79,25 +89,25 @@ def main():
                         next_run_dt = datetime.now(sp_tz) + timedelta(seconds=wait_time)
                         next_run = next_run_dt.strftime("%H:%M:%S")
                         msg = f"⏱️ Próxima execução em {wait_time // 60} minutos ({next_run} - horário SP)"
-                        print(f"\n{msg}")
+                        logger.info(f"\n{msg}")
                         messenger.send("info", {"title": msg})
                         time.sleep(wait_time)
 
-                    except KeyboardInterrupt:
-                        print("\nInterrompido pelo usuário")
-                        return
                     except Exception as e:
                         error_msg = f"Erro durante a execução: {e}"
-                        print(f"\nError: {error_msg}")
+                        logger.error(f"\nError: {error_msg}")
                         messenger.send("error", {"title": error_msg})
-                        print("⏳ Reiniciando após 5 minutos...")
+                        logger.info("⏳ Reiniciando após 5 minutos...")
                         time.sleep(300)
 
+        except KeyboardInterrupt:
+            logger.info("\nInterrompido pelo usuário. Encerrando...")
         finally:
             if browser:
                 browser.close()
             if db:
                 db.close()
+            logger.info("Recursos liberados. Programa encerrado.")
 
 
 def config(playwright) -> tuple[Messenger, Searcher, Job_database, Browser]:

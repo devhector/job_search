@@ -1,4 +1,6 @@
+import time
 import requests
+from logger import logger
 from notifier import Notifier
 
 
@@ -8,14 +10,27 @@ class Telegram_bot(Notifier):
         self.chat_id = config["chat_id"]
         self.BASE_URL = f"https://api.telegram.org/bot{self.token_id}"
 
-    def notify(self, type_: str, message: dict) -> None:
+    def notify(self, type_: str, message: dict, retries=5, delay=5) -> None:
         payload = {
             "chat_id": self.chat_id,
             "text": self._prettify(type_, message),
             "parse_mode": "Markdown",
         }
-        response = requests.post(f"{self.BASE_URL}/sendMessage", data=payload)
-        response.raise_for_status()
+        for i in range(retries):
+            try:
+                response = requests.post(f"{self.BASE_URL}/sendMessage", data=payload)
+                response.raise_for_status()
+                return
+            except requests.exceptions.RequestException as e:
+                if i < retries - 1:
+                    logger.warning(
+                        f"Failed to send notification (attempt {i + 1}/{retries}). Retrying in {delay}s..."
+                    )
+                    time.sleep(delay)
+                else:
+                    logger.error(
+                        f"Failed to send notification after {retries} attempts: {e}"
+                    )
 
     def _prettify(self, type_: str, message: dict) -> str:
         if type_ == "job":
