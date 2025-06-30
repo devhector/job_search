@@ -3,8 +3,14 @@ import json
 import time
 import random
 
+import os
+import json
+import time
+import random
+
 from platform import Platform
 from logger import logger
+from exceptions import InvalidCookieException
 
 
 class Linkedin(Platform):
@@ -26,12 +32,18 @@ class Linkedin(Platform):
         time.sleep(random.uniform(1.0, 3.0))
 
     def _check_login(self) -> None:
-        page = self.browser.page
-        page.goto(self.BASE_URL)
-        page.wait_for_selector(
-            self.TOP_BAR_FEED,
-            timeout=100000,
-        )
+        try:
+            page = self.browser.page
+            page.goto(self.BASE_URL)
+            page.wait_for_selector(
+                self.TOP_BAR_FEED,
+                timeout=10000,  # Reduced timeout for faster feedback
+            )
+        except Exception as e:
+            logger.error("Login check failed. The cookie might be invalid or expired.")
+            raise InvalidCookieException(
+                "Linkedin cookie is invalid.", platform_name="LinkedIn"
+            ) from e
 
     def _manual_login(self) -> None:
         try:

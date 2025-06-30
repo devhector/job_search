@@ -1,4 +1,6 @@
 from platform import Platform
+from exceptions import InvalidCookieException
+from logger import logger
 
 
 class Authenticator:
@@ -7,4 +9,8 @@ class Authenticator:
 
     def auth(self):
         for platform in self.platforms:
-            platform.login()
+            try:
+                platform.login()
+            except InvalidCookieException as e:
+                logger.error(f"Authentication failed for {type(platform).__name__}: {e}")
+                raise e
