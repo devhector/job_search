@@ -59,6 +59,8 @@ def main():
 
                         for job_title, location, seniority in combinations:
                             try:
+                                db.delete_expired_jobs()
+
                                 posted_time = random.randint(24, 36)
 
                                 terms = {

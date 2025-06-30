@@ -15,10 +15,14 @@ class Job_database:
                 title TEXT,
                 company TEXT,
                 location TEXT,
-                link TEXT
+                link TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        self.conn.commit()
 
+    def delete_expired_jobs(self) -> None:
+        self.conn.execute("DELETE FROM jobs WHERE created_at <= datetime('now', '-24 hours')")
         self.conn.commit()
 
     def filter_new_jobs(self, jobs: list[dict]) -> list[dict]:
