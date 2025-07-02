@@ -1,55 +1,102 @@
-## Vaguinhas
+# Vaguinhas
 
-Esse projeto tem como intuíto facilitar a busca de vagas de emprego.
-Ele consiste de um crawler do linkedin jobs (que será extendido para outros divulgadores de vagas),
-que notifica através de um bot do telegram novas vagas específicadas pelo filtro criado pelo usuário.
+Este projeto é uma ferramenta para automatizar a busca por vagas de emprego no LinkedIn, notificando o usuário sobre novas oportunidades através de um bot no Telegram (ainda planejo adicionar outras formas de notificações).
 
-> Essa solução tem o risco de bloquear a sua conta do Linkedin, então é recomendado que não 
-> use a sua conta principal.
+> [!WARNING]
+> **Risco de Bloqueio:** O uso de automação para interagir com o LinkedIn pode violar os termos de serviço da plataforma e resultar no bloqueio da sua conta. **É altamente recomendável que você utilize uma conta secundária, não a sua principal.**
 
-### Instruções de uso:
+## Funcionalidades
 
-#### Passo 1:
-Como vamos usar o telegram para nos notificar, então precisamos primeiramente criar um bot.
-Para fazer isso é só pesquisar Botfather na busca do telegram e as demais instruções serão dadas
-por ele.
+- **Crawler de Vagas:** Realiza buscas automáticas no LinkedIn Jobs com base em filtros definidos pelo usuário.
+- **Notificações via Telegram:** Envia as vagas encontradas para um chat do Telegram em tempo real.
+- **Persistência:** Armazena as vagas já notificadas para evitar duplicatas.
 
-Depois de concluir esta etapa, você terá o token necessário para o envio de mensagens ao telegram.
-Adicione esse token ao `.env`, como no exemplo demonstrado no `exemple.env`. Agora será necessário o `id`
-do chat, para isso mande uma mensagem para o bot, e em seguida use o seguinte comando:
-```sh
-curl https://api.telegram.org/bot<TOKEN>/getUpdates
-```
-(substitua o \<TOKEN\> pelo token usado no `.env`) com isso será exibido os chats abertos, pegue o id
-do chat com você. Adicione esse `id` ao `.env`.
+## Pré-requisitos
 
-#### Passo 2:
-Criação do envioronment e instalação das dependências:
+- Python 3.10+
+- Uma conta no Telegram
+- Uma conta no LinkedIn
 
-```sh
-python3 -m venv venv
-source venv/bin/activate
+## Instalação
 
-pip install -r requirements.txt
+1.  **Clone o repositório:**
+    ```sh
+    git clone https://github.com/seu-usuario/job_search.git
+    cd vaguinha
+    ```
 
-playwright install
-```
+2.  **Crie e ative um ambiente virtual:**
+    ```sh
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
 
-#### Passo 3:
-substitua o filtro na `main.py` para a vaga que pretende ser notificado, na função `linkedin.search_jobs()` e em seguida
-rode o programa com `python3 main.py`.
+3.  **Instale as dependências:**
+    ```sh
+    pip install -r requirements.txt
+    ```
 
-Nesse primeiro momento, será aberto a linkedin para ser feito o login. Essa abordagem evita o bot de cair em algum captcha.
-Faça login em uma conta secundária, o que ele vai fazer é salvar o cookie de sessão, e nas próximas interações esse cookie será
-usado e não precisará de login novamente, somente quando o cookie expirar.
+4.  **Instale os drivers do Playwright:**
+    ```sh
+    playwright install
+    ```
 
-Se tudo der certo, as vagas aparecerão no chatbot.
+## Configuração
 
-##### AVISOS:
+### 1. Bot do Telegram
 
-Essa primeira implementação está muito manual ainda (foi somente uma prova de conceito), mas melhorias estão sendo feitas.
-Na estratégia atual, foi pensado o uso do crontab para a execução periódica dessa solução, mas está longe de ser a ideal.
-- [x] Será implementado um banco de dados, para que as vagas que já foram notificadas não se repitam.
-- [ ] A busca e notificação de vagas será implementada de forma assíncrona
-- [ ] Rodar o script uma vez e ele ficar em um loop controlado, com o tempo que fará as buscas
+Você precisará de um token de bot e um ID de chat para que as notificações funcionem.
 
+1.  **Crie um Bot:**
+    - No Telegram, procure por `BotFather`.
+    - Envie o comando `/newbot` e siga as instruções para criar seu bot.
+    - O `BotFather` fornecerá um **token**.
+
+2.  **Obtenha o Chat ID:**
+    - Envie qualquer mensagem para o seu novo bot no Telegram.
+    - Execute o seguinte comando no seu terminal, substituindo `<TOKEN>` pelo token que você recebeu:
+      ```sh
+      curl https://api.telegram.org/bot<TOKEN>/getUpdates
+      ```
+    - Na resposta JSON, localize o objeto `chat` e copie o valor do campo `id`.
+
+### 2. Variáveis de Ambiente
+
+1.  **Crie o arquivo `.env`:**
+    - Renomeie ou copie o arquivo `exemple.env` para `.env`.
+
+2.  **Adicione as credenciais:**
+    - Abra o arquivo `.env` e adicione o token do bot e o ID do chat que você obteve:
+      ```env
+      TELEGRAM_TOKEN="SEU_TOKEN_AQUI"
+      TELEGRAM_CHAT_ID="SEU_CHAT_ID_AQUI"
+      ```
+
+## Como Usar
+
+1.  **Configure o Filtro de Busca:**
+    - Abra o arquivo `main.py`.
+    - Na função `main`, localize as Variáveis `job_titles`, `locations` e `seniority_levels`.
+    - Altere os parâmetros (como `job_titles` e `locations`) para definir o tipo de vaga que você deseja buscar.
+
+2.  **Execute o Script:**
+    ```sh
+    python3 main.py
+    ```
+
+### Primeiro Acesso
+
+Na primeira vez que o script for executado, uma janela do navegador será aberta para que você faça o login no LinkedIn. Esta etapa é necessária para salvar os cookies de sessão, permitindo que o bot se autentique em execuções futuras sem a necessidade de login manual.
+
+Após o login, o script começará a buscar as vagas e, se encontrar alguma que corresponda ao seu filtro, enviará uma notificação para o seu bot no Telegram.
+
+Caso o cookie expire, você pode executar o `scripts/create_cookies.py` para que o cookie seja renovado.
+
+## Roadmap de Melhorias
+
+Esta é uma prova de conceito e melhorias contínuas estão sendo planejadas:
+
+- [ ] Implementar a busca e notificação de forma assíncrona para melhor performance.
+- [x] Transformar o script em um serviço de loop contínuo, com intervalos de busca configuráveis.
+- [ ] Adicionar suporte a outras plataformas de vagas além do LinkedIn.
+- [ ] Criar uma interface mais amigável para gerenciar os filtros de busca.
