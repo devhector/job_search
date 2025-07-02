@@ -1,6 +1,6 @@
 # Vaguinhas
 
-Este projeto é uma ferramenta para automatizar a busca por vagas de emprego no LinkedIn, notificando o usuário sobre novas oportunidades através de um bot no Telegram (ainda planejo adicionar outras formas de notificações).
+Este projeto é uma ferramenta para automatizar a busca por vagas de emprego no LinkedIn (terão outras plataformas), notificando o usuário sobre novas oportunidades através de um bot no Telegram (ainda planejo adicionar outras formas de notificações).
 
 > [!WARNING]
 > **Risco de Bloqueio:** O uso de automação para interagir com o LinkedIn pode violar os termos de serviço da plataforma e resultar no bloqueio da sua conta. **É altamente recomendável que você utilize uma conta secundária, não a sua principal.**
@@ -21,8 +21,8 @@ Este projeto é uma ferramenta para automatizar a busca por vagas de emprego no 
 
 1.  **Clone o repositório:**
     ```sh
-    git clone https://github.com/seu-usuario/job_search.git
-    cd vaguinha
+    git clone https://github.com/devhector/job_search.git
+    cd job_search
     ```
 
 2.  **Crie e ative um ambiente virtual:**
