@@ -2,13 +2,15 @@ import os
 import random
 import sys
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
 
-from authenticator import Authenticator
-from browser import Browser
-from linkedin import Linkedin
-from logger import logger
+from src.core.authenticator import Authenticator
+from src.utils.browser import Browser
+from src.platforms.linkedin import Linkedin
+from src.utils.logger import logger
 
 
 def main():

@@ -3,14 +3,9 @@ import json
 import time
 import random
 
-import os
-import json
-import time
-import random
-
-from platform import Platform
-from logger import logger
-from exceptions import InvalidCookieException
+from src.platforms.base import Platform
+from src.utils.logger import logger
+from src.utils.exceptions import InvalidCookieException
 
 
 class Linkedin(Platform):

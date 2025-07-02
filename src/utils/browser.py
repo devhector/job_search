@@ -1,5 +1,5 @@
 import time
-from logger import logger
+from src.utils.logger import logger
 
 
 class Browser:

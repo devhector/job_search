@@ -1,4 +1,4 @@
-from notifier import Notifier
+from src.notifiers.base import Notifier
 
 
 class Messenger:

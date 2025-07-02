@@ -1,4 +1,4 @@
-from platform import Platform
+from src.platforms.base import Platform
 
 
 class Searcher:

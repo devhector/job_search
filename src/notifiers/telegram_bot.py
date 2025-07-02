@@ -1,7 +1,7 @@
 import time
 import requests
-from logger import logger
-from notifier import Notifier
+from src.utils.logger import logger
+from src.notifiers.base import Notifier
 
 
 class Telegram_bot(Notifier):

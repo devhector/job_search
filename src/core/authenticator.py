@@ -1,6 +1,6 @@
-from platform import Platform
-from exceptions import InvalidCookieException
-from logger import logger
+from src.platforms.base import Platform
+from src.utils.exceptions import InvalidCookieException
+from src.utils.logger import logger
 
 
 class Authenticator:
