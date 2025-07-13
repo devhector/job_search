@@ -8,7 +8,7 @@ from src.utils.proxy import Proxy
 
 
 def test():
-    load_dotenv()
+    load_dotenv('.config/.env')
 
     proxy_api_url = os.getenv("PROXY_API_URL")
     proxy = Proxy(proxy_api_url)

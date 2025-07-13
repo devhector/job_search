@@ -11,7 +11,7 @@ from src.utils.exceptions import InvalidCookieException
 class Linkedin(Platform):
     def __init__(self, browser):
         self.BASE_URL = "https://www.linkedin.com"
-        self.COOKIE_PATH = "cookies/linkedin.json"
+        self.COOKIE_PATH = ".config/cookies/linkedin.json"
         self.TOP_BAR_FEED = (
             "div.share-box-feed-entry-toolbar__wrapper.share-box-feed-entry__tool-bar"
         )

@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 
 def main():
-    load_dotenv()
+    load_dotenv('.config/.env')
 
     job_titles = [
         "Java",

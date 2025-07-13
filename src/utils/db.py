@@ -3,7 +3,7 @@ import hashlib
 
 
 class Job_database:
-    def __init__(self, db_path: str = "job.db") -> None:
+    def __init__(self, db_path: str = ".config/db/job.db") -> None:
         self.conn = sqlite3.connect(db_path)
         self._create_table()
 

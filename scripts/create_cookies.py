@@ -15,10 +15,10 @@ from src.utils.logger import logger
 
 def main():
     """Manually logs into platforms to create/update session cookies."""
-    load_dotenv()
+    load_dotenv('.config/.env')
 
     # Path to the cookie file
-    cookie_path = "cookies/linkedin.json"
+    cookie_path = ".config/cookies/linkedin.json"
 
     # Remove existing cookie file to ensure a fresh login
     if os.path.exists(cookie_path):
