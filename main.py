@@ -30,12 +30,13 @@ def main():
     ]
     seniority_levels = ["junior"]
 
-    orchestrator = JobSearchOrchestrator(job_titles, locations, seniority_levels)
+    orchestrator = JobSearchOrchestrator(
+        job_titles, locations, seniority_levels)
     try:
         orchestrator.run()
     except KeyboardInterrupt:
         logger.info("\nInterrompido pelo usuário. Encerrando...")
-        orchestrator._shutdown()
+        orchestrator.shutdown()
         sys.exit(0)
 
 

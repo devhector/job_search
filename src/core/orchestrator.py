@@ -1,20 +1,22 @@
-from src.utils.logger import logger
-from src.utils.exceptions import InvalidCookieException
-from src.utils.db import Job_database
-from src.utils.browser import Browser
-from src.platforms.linkedin import Linkedin
-from src.notifiers.telegram_bot import Telegram_bot
-from src.core.searcher import Searcher
-from src.core.messenger import Messenger
-from src.core.authenticator import Authenticator
-from playwright.sync_api import Playwright
 import itertools
 import os
 import random
 import sys
 import time
-from datetime import datetime, timedelta
 import zoneinfo
+from datetime import datetime, timedelta
+
+from playwright.sync_api import Playwright, sync_playwright
+
+from src.core.authenticator import Authenticator
+from src.core.messenger import Messenger
+from src.core.searcher import Searcher
+from src.notifiers.telegram_bot import Telegram_bot
+from src.platforms.linkedin import Linkedin
+from src.utils.browser import Browser
+from src.utils.db import Job_database
+from src.utils.exceptions import InvalidCookieException
+from src.utils.logger import logger
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -30,7 +32,8 @@ class JobSearchOrchestrator:
         self.locations = locations
         self.seniority_levels = seniority_levels
         self.combinations = list(
-            itertools.product(self.job_titles, self.locations, self.seniority_levels)
+            itertools.product(self.job_titles, self.locations,
+                              self.seniority_levels)
         )
         self.sp_tz = zoneinfo.ZoneInfo("America/Sao_Paulo")
         self.db = None
@@ -57,14 +60,14 @@ class JobSearchOrchestrator:
         )
 
         linkedin = Linkedin(self.browser)
+
         authenticator = Authenticator([linkedin])
         authenticator.auth()  # Pode levantar InvalidCookieException
 
         self.searcher = Searcher([linkedin])
         logger.info("Serviços configurados com sucesso.")
 
-    def _shutdown(self):
-        """Encerra os recursos de forma segura."""
+    def shutdown(self):
         if self.browser:
             self.browser.close()
         if self.db:
@@ -72,7 +75,6 @@ class JobSearchOrchestrator:
         logger.info("Recursos liberados.")
 
     def _perform_search_iteration(self, job_title, location, seniority):
-        """Executa uma única iteração do ciclo de busca de vagas."""
         try:
             self.db.delete_expired_jobs()
             posted_time = random.randint(24, 36)
@@ -104,11 +106,12 @@ class JobSearchOrchestrator:
             self.db.save(new_jobs)
 
             wait_time = random.randint(300, 3600)
-            next_run_dt = datetime.now(self.sp_tz) + timedelta(seconds=wait_time)
+            next_run_dt = datetime.now(
+                self.sp_tz) + timedelta(seconds=wait_time)
             next_run = next_run_dt.strftime("%H:%M:%S")
             msg = f"⏱️ Próxima execução em {wait_time // 60} minutos ({next_run} - horário SP)"
             logger.info(f"\n{msg}")
-            self.messenger.send("info", {"title": msg})
+            # self.messenger.send("info", {"title": msg})
             time.sleep(wait_time)
 
         except Exception as e:
@@ -158,4 +161,4 @@ class JobSearchOrchestrator:
                 time.sleep(21600)
 
             finally:
-                self._shutdown()
+                self.shutdown()
