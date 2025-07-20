@@ -1,7 +1,6 @@
-import time
-import requests
-from src.utils.logger import logger
+from src.core.message import Message
 from src.notifiers.base import Notifier
+from src.utils.logger import logger
 
 
 class Telegram_bot(Notifier):
@@ -10,10 +9,10 @@ class Telegram_bot(Notifier):
         self.chat_id = config["chat_id"]
         self.BASE_URL = f"https://api.telegram.org/bot{self.token_id}"
 
-    def notify(self, type_: str, message: dict, retries=5, delay=5) -> None:
+    def notify(self, message: Message, retries=5, delay=5) -> None:
         payload = {
             "chat_id": self.chat_id,
-            "text": self._prettify(type_, message),
+            "text": self._prettify(message),
             "parse_mode": "Markdown",
         }
         for i in range(retries):
@@ -32,8 +31,8 @@ class Telegram_bot(Notifier):
                         f"Failed to send notification after {retries} attempts: {e}"
                     )
 
-    def _prettify(self, type_: str, message: dict) -> str:
-        if type_ == "job":
+    def _prettify(self, message: Message) -> str:
+        if message["type"] == "job":
             return (
                 f"📌 *{message['title']}*\n"
                 f"🏢 {message['company']}\n"
@@ -41,9 +40,14 @@ class Telegram_bot(Notifier):
                 f"🔗 [Ver vaga]({message['link']})\n"
                 "-----------------------------"
             )
-        elif type_ == "info":
+        elif message["type"] == "info":
             return f"ℹ️ {message['title']}"
-        elif type_ == "error":
+        elif message["type"] == "error":
             return f"❌ {message['title']}"
         else:
             return f"🔔 {message.get('title', 'Mensagem recebida')}"
+
+
+import time
+
+import requests

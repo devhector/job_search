@@ -127,6 +127,7 @@ class Linkedin(Platform):
                         "company": company,
                         "location": location,
                         "link": link,
+                        "type": "job",
                     }
                 )
 

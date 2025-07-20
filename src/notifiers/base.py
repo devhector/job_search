@@ -1,3 +1,6 @@
+from src.core.message import Message
+
+
 class Notifier:
-    def notify(self, type_: str, message: dict) -> None:
+    def notify(self, message: Message) -> None:
         raise NotImplementedError("Method not implemented")

@@ -93,7 +93,7 @@ class JobSearchOrchestrator:
                 f"- *Postado nas últimas:* `{terms['posted_time']}h`"
             )
             logger.info(f"\n{message}")
-            self.messenger.send("info", {"title": message})
+            self.messenger.send({"title": message, "type": "info"})
 
             all_jobs = self.searcher.search(terms)
             all_jobs = [job for group in all_jobs for job in group]
@@ -101,7 +101,7 @@ class JobSearchOrchestrator:
             new_jobs = self.db.filter_new_jobs(all_jobs)
             for job in new_jobs:
                 logger.info(f"Enviando vaga: {job['title']}")
-                self.messenger.send("job", job)
+                self.messenger.send(job)
 
             self.db.save(new_jobs)
 
@@ -118,7 +118,7 @@ class JobSearchOrchestrator:
             error_msg = f"Erro durante a execução: {e}"
             logger.error(f"\nError: {error_msg}")
             if self.messenger:
-                self.messenger.send("error", {"title": error_msg})
+                self.messenger.send({"title": error_msg, "type": "error"})
             time.sleep(300)
 
     def run(self):
@@ -153,7 +153,7 @@ class JobSearchOrchestrator:
                             )
                         ]
                     )
-                self.messenger.send("error", {"title": error_msg})
+                self.messenger.send({"title": error_msg, "type": "error"})
 
                 logger.info(
                     "Aguardando 6 horas para tentar novamente a autenticação..."
