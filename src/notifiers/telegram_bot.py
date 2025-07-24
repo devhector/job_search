@@ -1,3 +1,5 @@
+import requests
+import time
 from src.core.message import Message
 from src.notifiers.base import Notifier
 from src.utils.logger import logger
@@ -40,14 +42,9 @@ class Telegram_bot(Notifier):
                 f"🔗 [Ver vaga]({message['link']})\n"
                 "-----------------------------"
             )
+        elif message["type"] == "post":
+            return f"*{message['title']}*\n [Ver]({message['link']})"
         elif message["type"] == "info":
             return f"ℹ️ {message['title']}"
         elif message["type"] == "error":
             return f"❌ {message['title']}"
-        else:
-            return f"🔔 {message.get('title', 'Mensagem recebida')}"
-
-
-import time
-
-import requests

@@ -35,7 +35,8 @@ class Linkedin(Platform):
                 timeout=10000,  # Reduced timeout for faster feedback
             )
         except Exception as e:
-            logger.error("Login check failed. The cookie might be invalid or expired.")
+            logger.error(
+                "Login check failed. The cookie might be invalid or expired.")
             raise InvalidCookieException(
                 "Linkedin cookie is invalid.", platform_name="LinkedIn"
             ) from e
@@ -63,7 +64,8 @@ class Linkedin(Platform):
 
     def _load_cookie(self) -> None:
         if not os.path.exists(self.COOKIE_PATH):
-            raise FileNotFoundError(f"Cookie file not found: {self.COOKIE_PATH}")
+            raise FileNotFoundError(
+                f"Cookie file not found: {self.COOKIE_PATH}")
 
         with open(self.COOKIE_PATH, "r") as file:
             cookie = json.load(file)
@@ -80,7 +82,8 @@ class Linkedin(Platform):
         ]
 
         if not seniority_ids:
-            raise Exception(f"Nenhuma senioridade válida encontrada em: {seniority}")
+            raise Exception(
+                f"Nenhuma senioridade válida encontrada em: {seniority}")
 
         seniority_param = ",".join(seniority_ids)
 
@@ -103,12 +106,16 @@ class Linkedin(Platform):
 
         return self._jobs_parser(page.query_selector_all("div.job-card-container"))
 
+    def search_post_jobs(self, title, location, seniority, posted_time=24):
+        pass
+
     def _jobs_parser(self, jobs):
         jobs_data = []
         for job in jobs:
             try:
                 title_el = job.query_selector("a.job-card-container__link")
-                company_el = job.query_selector("div.artdeco-entity-lockup__subtitle")
+                company_el = job.query_selector(
+                    "div.artdeco-entity-lockup__subtitle")
                 location_el = job.query_selector(
                     "ul.job-card-container__metadata-wrapper li"
                 )
@@ -135,3 +142,4 @@ class Linkedin(Platform):
                 logger.error(f"An error occurred: {e}")
                 continue
         return jobs_data
+

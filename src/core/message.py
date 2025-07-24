@@ -14,9 +14,15 @@ class Info(TypedDict):
     type: Literal["info"]
 
 
+class Post(TypedDict):
+    title: str
+    link: str
+    type: Literal["post"]
+
+
 class Error(TypedDict):
     title: str
     type: Literal["error"]
 
 
-Message = Union[Job, Info, Error]
+Message = Union[Job, Info, Post, Error]
