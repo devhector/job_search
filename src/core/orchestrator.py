@@ -6,6 +6,7 @@ import time
 import zoneinfo
 from datetime import datetime, timedelta
 
+from src.platforms.nerdin import Nerdin
 from playwright.sync_api import Playwright, sync_playwright
 
 from src.core.authenticator import Authenticator
@@ -32,8 +33,7 @@ class JobSearchOrchestrator:
         self.locations = locations
         self.seniority_levels = seniority_levels
         self.combinations = list(
-            itertools.product(self.job_titles, self.locations,
-                              self.seniority_levels)
+            itertools.product(self.job_titles, self.locations, self.seniority_levels)
         )
         self.sp_tz = zoneinfo.ZoneInfo("America/Sao_Paulo")
         self.db = None
@@ -60,11 +60,12 @@ class JobSearchOrchestrator:
         )
 
         linkedin = Linkedin(self.browser)
+        nerdin = Nerdin(self.browser)
 
         authenticator = Authenticator([linkedin])
         authenticator.auth()  # Pode levantar InvalidCookieException
 
-        self.searcher = Searcher([linkedin])
+        self.searcher = Searcher([linkedin, nerdin])
         logger.info("Serviços configurados com sucesso.")
 
     def shutdown(self):
@@ -106,8 +107,7 @@ class JobSearchOrchestrator:
             self.db.save(new_jobs)
 
             wait_time = random.randint(300, 3600)
-            next_run_dt = datetime.now(
-                self.sp_tz) + timedelta(seconds=wait_time)
+            next_run_dt = datetime.now(self.sp_tz) + timedelta(seconds=wait_time)
             next_run = next_run_dt.strftime("%H:%M:%S")
             msg = f"⏱️ Próxima execução em {wait_time // 60} minutos ({next_run} - horário SP)"
             logger.info(f"\n{msg}")
